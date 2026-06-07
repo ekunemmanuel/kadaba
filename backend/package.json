@@ -1,0 +1,24 @@
+{
+  "name": "kadaba-document-generator",
+  "version": "1.0.0",
+  "description": "Kadaba Construction Ltd — Internal Document Generator API",
+  "module": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "start": "bun src/server.ts",
+    "build": "bun build src/server.ts --outdir dist --target bun"
+  },
+  "dependencies": {
+    "elysia": "^1.1.25",
+    "@elysiajs/cors": "^1.1.1",
+    "@elysiajs/static": "^1.1.1",
+    "puppeteer-core": "^22.8.2",
+    "nodemailer": "^6.9.14",
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.15",
+    "bun-types": "latest"
+  }
+}

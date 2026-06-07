@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Allocation Letter — Kadaba Construction Ltd</title>
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Page setup ── */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html, body {
+    width: 210mm;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    color: #1a1a1a;
+    background: white;
+  }
+
+  /* ════════════════════════════════════════════════
+     OUTER TABLE — drives repeating header + footer
+     thead → repeats at top of every page
+     tfoot → repeats at bottom of every page
+     tbody td → all document body content goes here
+  ════════════════════════════════════════════════ */
+  table.page-layout {
+    width: 210mm;
+    border-collapse: collapse;
+    page-break-inside: auto;
+  }
+
+  /* thead and tfoot repeat on every printed page */
+  table.page-layout > thead { display: table-header-group; }
+  table.page-layout > tfoot { display: table-footer-group; }
+  table.page-layout > tbody { display: table-row-group; }
+
+  /* ── Header cell (inside thead) ── */
+  .page-header-cell {
+    padding: 12mm 18mm 8mm;
+    border-bottom: 2.5px solid #1a3c5e;
+  }
+
+  .page-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Logo / brand block */
+  .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .logo-img { width: 70px; height: auto; }
+  .logo-text {
+    font-size: 20pt;
+    font-weight: 900;
+    color: #1a3c5e;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+  .logo-text .sub {
+    display: block;
+    font-size: 7pt;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: #555;
+  }
+  .logo-text .rc {
+    display: block;
+    font-size: 7pt;
+    color: #888;
+    font-weight: 400;
+  }
+
+  /* Company contact info (right side of header) */
+  .company-info {
+    text-align: right;
+    font-size: 9pt;
+    line-height: 1.65;
+    color: #333;
+  }
+  .company-info .phone { font-weight: bold; font-size: 9.5pt; }
+  .company-info a { color: #1a3c5e; text-decoration: none; }
+
+  /* ── Footer cell (inside tfoot) ── */
+  .page-footer-cell {
+    padding: 6px 18mm 10mm;
+    border-top: 2px solid #1a3c5e;
+  }
+  .page-footer-inner {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0 4px;
+    font-size: 8pt;
+    color: #555;
+  }
+  .page-footer-inner span { display: flex; align-items: center; }
+  .page-footer-inner span::before { content: ' | '; color: #1a3c5e; white-space: pre; }
+  .page-footer-inner span:first-child::before { display: none; }
+
+  /* ── Body cell (inside tbody) ── */
+  .page-body-cell {
+    padding: 10px 18mm 14px;
+    vertical-align: top;
+  }
+
+  /* ── Spacer used to push footer down — NOT needed with tfoot trick ── */
+
+  /* ── Ref + date row ── */
+  .ref-date-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .ref { font-weight: bold; font-size: 10.5pt; }
+  .date-block { text-align: right; font-weight: bold; font-size: 10.5pt; }
+
+  /* ── Buyer block + photo ── */
+  .buyer-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .buyer-info {
+    flex: 1;
+    font-weight: bold;
+    font-size: 10.5pt;
+    line-height: 1.9;
+  }
+  .buyer-photo {
+    width: 90px;
+    height: 110px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+  .buyer-photo-placeholder {
+    width: 90px;
+    height: 110px;
+    border: 1px solid #bbb;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8pt;
+    color: #aaa;
+    flex-shrink: 0;
+    margin-left: 16px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── Salutation ── */
+  .salutation { font-size: 10.5pt; margin-bottom: 14px; }
+
+  /* ── Subject heading ── */
+  .subject-heading {
+    text-align: center;
+    font-weight: bold;
+    font-size: 11pt;
+    text-decoration: underline;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    line-height: 1.55;
+  }
+
+  /* ── Opening paragraph ── */
+  .opening-para {
+    font-size: 10.5pt;
+    margin-bottom: 16px;
+    line-height: 1.55;
+    text-align: justify;
+  }
+
+  /* ── Property details table ── */
+  .details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 10.5pt;
+  }
+  .details-table td {
+    padding: 6px 8px;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .details-table td:first-child {
+    width: 38%;
+    font-weight: normal;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .details-table td:last-child { font-weight: bold; width: 62%; }
+  .details-table tr:nth-child(odd) td { background: #f7f9fc; }
+
+  /* ── Body text ── */
+  .body-text {
+    font-size: 10.5pt;
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 10px;
+  }
+
+  /* ── Notice block ── */
+  .notice-block {
+    margin-top: 12px;
+    font-size: 10pt;
+    line-height: 1.6;
+    text-align: justify;
+  }
+  .notice-block p { margin-bottom: 10px; }
+
+  /* ── Payment info ── */
+  .payment-info {
+    margin-top: 14px;
+    font-size: 10.5pt;
+    line-height: 1.7;
+  }
+  .bank-table { margin-top: 8px; font-size: 10.5pt; }
+  .bank-table td { padding: 3px 20px 3px 0; font-weight: bold; }
+
+  /* ── Watermark (positioned inside body cell) ── */
+  .watermark-wrap { position: relative; }
+  .watermark {
+    position: absolute;
+    bottom: -120px;
+    right: -10px;
+    opacity: 0.05;
+    font-size: 90pt;
+    font-weight: 900;
+    color: #1a3c5e;
+    letter-spacing: -4px;
+    transform: rotate(-20deg);
+    user-select: none;
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+  }
+  .body-content { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<!--
+  OUTER TABLE
+  thead  = page header  (repeats on every page automatically)
+  tfoot  = page footer  (repeats on every page automatically, always at bottom)
+  tbody  = all document content
+-->
+<table class="page-layout" role="presentation">
+
+  <!-- ══ REPEATING HEADER ══ -->
+  <thead>
+    <tr>
+      <td class="page-header-cell">
+        <div class="page-header-inner">
+          <div class="logo-block">
+            {{#if logoBase64}}
+              <img class="logo-img" src="{{logoBase64}}" alt="Kadaba Construction Ltd">
+            {{else}}
+              <div class="logo-text">
+                KADABA
+                <span class="sub">CONSTRUCTION LTD.</span>
+                <span class="rc">RC: 1473209</span>
+              </div>
+            {{/if}}
+          </div>
+          <div class="company-info">
+            <div class="phone">📞 +234 913 740 4045, +234 808 841 9995</div>
+            <div>📷 @kadaba_construction</div>
+            <div>✉️ <a href="mailto:info@kadabaconstruction.com">info@kadabaconstruction.com</a></div>
+            <div>📍 House 21, Michael Jackson Crescent,</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;5th Avenue, Gwarinpa, Abuja.</div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </thead>
+
+  <!-- ══ REPEATING FOOTER ══ -->
+  <tfoot>
+    <tr>
+      <td class="page-footer-cell">
+        <div class="page-footer-inner">
+          <span>Real Estate</span>
+          <span>Developer</span>
+          <span>Investment</span>
+          <span>Innovation</span>
+          <span>Technology</span>
+          <span>Property Management</span>
+        </div>
+      </td>
+    </tr>
+  </tfoot>
+
+  <!-- ══ BODY CONTENT ══ -->
+  <tbody>
+    <tr>
+      <td class="page-body-cell">
+        <div class="watermark-wrap">
+          <div class="watermark">KADAB</div>
+          <div class="body-content">
+
+            <!-- Ref + Date -->
+            <div class="ref-date-row">
+              <div class="ref">{{ref}}</div>
+              <div class="date-block">{{date}}</div>
+            </div>
+
+            <!-- Buyer + Photo -->
+            <div class="buyer-section">
+              <div class="buyer-info">
+                <div>{{buyer.name}}</div>
+                <div>{{buyer.address}}</div>
+                {{#if buyer.email}}<div>{{buyer.email}}</div>{{/if}}
+                {{#if buyer.phone}}<div>{{buyer.phone}}</div>{{/if}}
+              </div>
+              {{#if buyer.photoBase64}}
+                <img class="buyer-photo" src="{{buyer.photoBase64}}" alt="Buyer Photo">
+              {{else}}
+                <div class="buyer-photo-placeholder">No<br>Photo</div>
+              {{/if}}
+            </div>
+
+            <!-- Salutation -->
+            <div class="salutation">Dear Sir/Ma,</div>
+
+            <!-- Subject heading -->
+            <div class="subject-heading">
+              PROVISIONAL ALLOCATION FOR {{property.description}}<br>
+              BLOCK NO.{{property.blockNo}}, AT {{property.estate}}{{#if property.plotNo}} {{property.plotNo}}{{/if}}{{#if property.district}}, DISTRICT:<br>{{property.district}}{{/if}}{{#if property.cadastralZone}} {{property.cadastralZone}}{{/if}}, FCT ABUJA
+            </div>
+
+            <!-- Opening paragraph -->
+            <p class="opening-para">
+              Pursuant to your application in form No. and further inspection of the above-named estate, the board of directors, have approved this provisional allocation in your name.
+            </p>
+
+            <!-- Property details table -->
+            <table class="details-table">
+              <tr>
+                <td>PROPERTY LOCATION:</td>
+                <td>{{propertyLocationFull}}</td>
+              </tr>
+              <tr>
+                <td>PROPERTY DESCRIPTION:</td>
+                <td>{{property.description}} BLOCK NO. {{property.blockNo}} referred above.</td>
+              </tr>
+              <tr>
+                <td>PAYMENT DURATION:</td>
+                <td>{{financials.durationText}}</td>
+              </tr>
+              <tr>
+                <td>OFFER PRICE:</td>
+                <td>{{offerPriceFmt}} ({{offerPriceWords}})</td>
+              </tr>
+              {{#if hasDiscount}}
+              <tr>
+                <td>DISCOUNT:</td>
+                <td>{{discountFmt}} ({{discountWords}})</td>
+              </tr>
+              {{/if}}
+              <tr>
+                <td>VALUE ADDED TAX ({{financials.vatPct}}%):</td>
+                <td>{{vatFmt}} ({{vatWords}})</td>
+              </tr>
+              <tr>
+                <td>TOTAL AMOUNT<br>PAYABLE:</td>
+                <td>{{totalFmt}} ({{totalWords}})</td>
+              </tr>
+            </table>
+
+            <!-- Initial deposit -->
+            {{#if financials.deposit}}
+            <p class="body-text">
+              Initial deposit of {{depositFmt}} ({{depositWords}})
+            </p>
+            {{/if}}
+
+            <!-- Legal notices -->
+            <div class="notice-block">
+              <p>
+                <strong>TAKE NOTICE</strong> that <strong>KADABA CONSTRUCTION LIMITED</strong> reserves the right to revoke this allocation where the purchaser fails to comply with the terms and conditions herein contained and to that effect, refund the purchaser in line with its internal policy, less 10% of the total amount paid.
+              </p>
+              <p>
+                <strong>DELAY IN COMPLETION:</strong> If for reasons the developer is unable to complete the project three months after the completion date specified in this allocation letter, the developer is required to give notice to the purchaser of such foreseeable constraints.
+              </p>
+              <p>
+                <strong>FACILITY MANAGEMENT:</strong> Upon completion of payment, you shall be required to enter into a Facility maintenance agreement, which shall establish your obligation with regards to maintenance of the estate's common areas.
+              </p>
+            </div>
+
+            <!-- Payment info -->
+            <div class="payment-info">
+              <p>For payments, please issue <strong>DRAFT/CHEQUES</strong> in favour of <strong>KADABA CONSTRUCTION LIMITED.</strong> For direct deposit, payment should be made to:</p>
+              <table class="bank-table">
+                <tr>
+                  <td>JAIZ BANK</td>
+                  <td>0004053473</td>
+                </tr>
+                <tr>
+                  <td colspan="2">ABDULLAHI MUIZUDEEN YOONUS</td>
+                </tr>
+              </table>
+            </div>
+
+          </div><!-- /body-content -->
+        </div><!-- /watermark-wrap -->
+      </td>
+    </tr>
+  </tbody>
+
+</table>
+</body>
+</html>

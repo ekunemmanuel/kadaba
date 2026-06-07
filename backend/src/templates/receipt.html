@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Receipt — Kadaba Construction Ltd</title>
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Page setup ── */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html, body {
+    width: 210mm;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    color: #1a1a1a;
+    background: white;
+  }
+
+  /* ════════════════════════════════════════════════
+     OUTER TABLE — drives repeating header + footer
+     thead → repeats at top of every page
+     tfoot → repeats at bottom of every page
+     tbody td → all document body content goes here
+  ════════════════════════════════════════════════ */
+  table.page-layout {
+    width: 210mm;
+    border-collapse: collapse;
+    page-break-inside: auto;
+  }
+
+  table.page-layout > thead { display: table-header-group; }
+  table.page-layout > tfoot { display: table-footer-group; }
+  table.page-layout > tbody { display: table-row-group; }
+
+  /* ── Header cell — IDENTICAL to allocation.html ── */
+  .page-header-cell {
+    padding: 12mm 18mm 8mm;
+    border-bottom: 2.5px solid #1a3c5e;
+  }
+  .page-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .logo-img { width: 70px; height: auto; }
+  .logo-text {
+    font-size: 20pt;
+    font-weight: 900;
+    color: #1a3c5e;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+  .logo-text .sub {
+    display: block;
+    font-size: 7pt;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: #555;
+  }
+  .logo-text .rc {
+    display: block;
+    font-size: 7pt;
+    color: #888;
+    font-weight: 400;
+  }
+  .company-info {
+    text-align: right;
+    font-size: 9pt;
+    line-height: 1.65;
+    color: #333;
+  }
+  .company-info .phone { font-weight: bold; font-size: 9.5pt; }
+  .company-info a { color: #1a3c5e; text-decoration: none; }
+
+  /* ── Footer cell — same structure, receipt-specific text ── */
+  .page-footer-cell {
+    padding: 6px 18mm 10mm;
+    border-top: 2px solid #1a3c5e;
+  }
+  .page-footer-inner {
+    text-align: center;
+    font-size: 8pt;
+    color: #777;
+  }
+
+  /* ── Body cell ── */
+  .page-body-cell {
+    padding: 10px 18mm 14px;
+    vertical-align: top;
+  }
+
+  /* ── Receipt title bar ── */
+  .receipt-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a3c5e;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  .receipt-title-bar h1 {
+    font-size: 18pt;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .receipt-meta {
+    text-align: right;
+    font-size: 9.5pt;
+    line-height: 1.7;
+  }
+
+  /* ── Details table ── */
+  .details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14px;
+    font-size: 10.5pt;
+  }
+  .details-table td {
+    padding: 6px 10px;
+    vertical-align: top;
+    line-height: 1.5;
+    border-bottom: 0.5px solid #e5e5e5;
+  }
+  .details-table td.label { width: 36%; color: #555; font-weight: normal; }
+  .details-table td.value { font-weight: bold; width: 64%; }
+  .details-table tr:nth-child(odd) td { background: #f7f9fc; }
+
+  /* ── Amount box ── */
+  .amount-box {
+    background: #1a3c5e;
+    color: white;
+    padding: 14px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+  .amount-box .lbl { font-size: 8.5pt; opacity: 0.75; margin-bottom: 3px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .amount-box .amt { font-size: 22pt; font-weight: 700; letter-spacing: 0.01em; color: #c9a94e; }
+  .amount-box .wds { font-size: 9pt; opacity: 0.8; margin-top: 4px; font-style: italic; }
+
+  /* ── Payment method ── */
+  .payment-method-row {
+    font-size: 10.5pt;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .method-label { color: #555; margin-right: 4px; }
+  .method-option { display: inline-flex; align-items: center; gap: 5px; margin-right: 14px; font-size: 10pt; }
+  .checkbox {
+    width: 13px; height: 13px;
+    border: 1.5px solid #555;
+    display: inline-block;
+    border-radius: 2px;
+    background: white;
+    position: relative;
+    vertical-align: middle;
+  }
+  .checkbox.checked::after {
+    content: '✓';
+    position: absolute;
+    top: -2px; left: 1px;
+    font-size: 11px;
+    color: #1a3c5e;
+    font-weight: bold;
+  }
+
+  /* ── Notes ── */
+  .notes-row { font-size: 9.5pt; color: #555; font-style: italic; margin-bottom: 10px; }
+
+  /* ── Signature row ── */
+  .sig-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    font-size: 10pt;
+    padding-top: 10px;
+    border-top: 0.5px solid #ccc;
+  }
+  .sig-block { display: flex; flex-direction: column; gap: 4px; }
+  .sig-line { border-bottom: 1px solid #555; width: 160px; height: 22px; }
+</style>
+</head>
+<body>
+
+<table class="page-layout" role="presentation">
+
+  <!-- ══ REPEATING HEADER — identical structure to allocation.html ══ -->
+  <thead>
+    <tr>
+      <td class="page-header-cell">
+        <div class="page-header-inner">
+          <div class="logo-block">
+            {{#if logoBase64}}
+              <img class="logo-img" src="{{logoBase64}}" alt="Kadaba Construction Ltd">
+            {{else}}
+              <div class="logo-text">
+                KADABA
+                <span class="sub">CONSTRUCTION LTD.</span>
+                <span class="rc">RC: 1473209</span>
+              </div>
+            {{/if}}
+          </div>
+          <div class="company-info">
+            <div class="phone">📞 +234 913 740 4045, +234 808 841 9995</div>
+            <div>📷 @kadaba_construction</div>
+            <div>✉️ <a href="mailto:info@kadabaconstruction.com">info@kadabaconstruction.com</a></div>
+            <div>📍 House 21, Michael Jackson Crescent,</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;5th Avenue, Gwarinpa, Abuja.</div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </thead>
+
+  <!-- ══ REPEATING FOOTER ══ -->
+  <tfoot>
+    <tr>
+      <td class="page-footer-cell">
+        <div class="page-footer-inner">
+          This is an official receipt of Kadaba Construction Ltd &nbsp;·&nbsp; RC: 1473209
+        </div>
+      </td>
+    </tr>
+  </tfoot>
+
+  <!-- ══ BODY CONTENT ══ -->
+  <tbody>
+    <tr>
+      <td class="page-body-cell">
+
+        <!-- Receipt title bar -->
+        <div class="receipt-title-bar">
+          <h1>RECEIPT</h1>
+          <div class="receipt-meta">
+            <div>Receipt No.: <strong>{{receiptNo}}</strong></div>
+            <div>Date: <strong>{{date}}</strong></div>
+          </div>
+        </div>
+
+        <!-- Payer details -->
+        <table class="details-table">
+          <tr>
+            <td class="label">Received From:</td>
+            <td class="value">{{payer.name}}</td>
+          </tr>
+          {{#if payer.address}}
+          <tr>
+            <td class="label">Address:</td>
+            <td class="value">{{payer.address}}</td>
+          </tr>
+          {{/if}}
+          <tr>
+            <td class="label">Phone / Email:</td>
+            <td class="value">{{payer.phone}}{{#if payer.email}}{{#if payer.phone}} / {{/if}}{{payer.email}}{{/if}}</td>
+          </tr>
+          <tr>
+            <td class="label">Being Payment For:</td>
+            <td class="value">{{purpose}}</td>
+          </tr>
+          {{#if bankRef}}
+          <tr>
+            <td class="label">Bank / Ref No.:</td>
+            <td class="value">{{bankRef}}</td>
+          </tr>
+          {{/if}}
+          {{#if balance}}
+          <tr>
+            <td class="label">Balance (if any):</td>
+            <td class="value">{{balance}}</td>
+          </tr>
+          {{/if}}
+        </table>
+
+        <!-- Amount box -->
+        <div class="amount-box">
+          <div class="lbl">Amount Paid</div>
+          <div class="amt">{{amountFmt}}</div>
+          <div class="wds">({{amountWords}})</div>
+        </div>
+
+        <!-- Payment method checkboxes -->
+        <div class="payment-method-row">
+          <span class="method-label">Payment Method:</span>
+          <span class="method-option"><span class="checkbox {{#if isCash}}checked{{/if}}"></span> Cash</span>
+          <span class="method-option"><span class="checkbox {{#if isBankTransfer}}checked{{/if}}"></span> Bank Transfer</span>
+          <span class="method-option"><span class="checkbox {{#if isCheque}}checked{{/if}}"></span> Cheque</span>
+          <span class="method-option"><span class="checkbox {{#if isPOS}}checked{{/if}}"></span> POS</span>
+        </div>
+
+        {{#if notes}}
+        <div class="notes-row">Note: {{notes}}</div>
+        {{/if}}
+
+        <!-- Signatures -->
+        <div class="sig-row">
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div>Received By</div>
+          </div>
+          <div class="sig-block" style="text-align:right">
+            <div class="sig-line" style="margin-left:auto"></div>
+            <div>Authorised Signature</div>
+          </div>
+        </div>
+
+      </td>
+    </tr>
+  </tbody>
+
+</table>
+</body>
+</html>

@@ -15,6 +15,7 @@ const app = new Elysia()
   //   }),
   // )
   // Health check
+  .get("/", () => "Hello from Bun + Elysia on Vercel!")
   .get("/api/health", () => ({
     status: "ok",
     service: "Kadaba Document Generator",
@@ -23,7 +24,7 @@ const app = new Elysia()
     timestamp: new Date().toISOString(),
   }))
   // API routes
-  .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes))
+  // .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes))
   // .listen(PORT);
 
 console.log(`

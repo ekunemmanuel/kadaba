@@ -1,7 +1,7 @@
 // src/index.ts   (the file Vercel will run)
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
-// import { documentsRoutes } from "./routes/documents";
+import { documentsRoutes } from "./routes/documents";
 import { emailRoutes } from "./routes/email";
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN ?? "*";
 const app = new Elysia()
@@ -21,6 +21,6 @@ const app = new Elysia()
     timestamp: new Date().toISOString(),
   }))
   // ── API sub‑router (prefix = /api)
-  .group("/api", (app) => app.use(emailRoutes));
+  .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes));
 // **Never call .listen()** – Vercel will invoke the exported handler.
 export default app;

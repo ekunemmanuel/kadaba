@@ -7,13 +7,13 @@ const PORT = Number(process.env.PORT ?? 3000);
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN ?? "*";
 
 const app = new Elysia()
-  .use(
-    cors({
-      origin: ALLOWED_ORIGIN,
-      methods: ["GET", "POST", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    }),
-  )
+  // .use(
+  //   cors({
+  //     origin: ALLOWED_ORIGIN,
+  //     methods: ["GET", "POST", "OPTIONS"],
+  //     allowedHeaders: ["Content-Type", "Authorization"],
+  //   }),
+  // )
   // Health check
   .get("/api/health", () => ({
     status: "ok",

@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 // import { cors } from "@elysiajs/cors";
-// import { documentsRoutes } from "./routes/documents.ts";
-// import { emailRoutes } from "./routes/email.ts";
+import { documentsRoutes } from "./routes/documents.ts";
+import { emailRoutes } from "./routes/email.ts";
 const PORT = Number(process.env.PORT ?? 3000);
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN ?? "*";
 const app = new Elysia()
@@ -23,7 +23,7 @@ const app = new Elysia()
     timestamp: new Date().toISOString(),
   }))
   // ── API sub‑router (prefix = /api)
-  // .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes))
+  .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes))
   // ── Start server (only when you run locally)
   // .listen(PORT);
 export default app;

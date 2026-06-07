@@ -12,7 +12,7 @@ const app = new Elysia()
       origin: ALLOWED_ORIGIN,
       methods: ["GET", "POST", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
-    })
+    }),
   )
   // Health check
   .get("/api/health", () => ({
@@ -23,11 +23,7 @@ const app = new Elysia()
     timestamp: new Date().toISOString(),
   }))
   // API routes
-  .group("/api", (app) =>
-    app
-      .use(documentsRoutes)
-      .use(emailRoutes)
-  )
+  .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes))
   .listen(PORT);
 
 console.log(`
@@ -38,4 +34,5 @@ console.log(`
 ╚══════════════════════════════════════════════════╝
 `);
 
+export default app;
 export type App = typeof app;

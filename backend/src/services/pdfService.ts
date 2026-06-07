@@ -24,65 +24,90 @@ async function getTemplate(name: string): Promise<HandlebarsTemplateDelegate> {
   return compiled;
 }
 
-// ─── Puppeteer launcher ───────────────────────────────────────────────────────
+// // ─── Puppeteer launcher ───────────────────────────────────────────────────────
+
+// async function htmlToPdf(html: string, filename: string): Promise<string> {
+//   // Dynamically import puppeteer-core so this module loads even without it installed
+//   const puppeteer = await import("puppeteer-core");
+
+//   const chromiumPath =
+//     process.env.CHROMIUM_PATH ??
+//     // Common locations — first one found wins
+//     [
+//       "/usr/bin/chromium-browser",
+//       "/usr/bin/chromium",
+//       "/usr/bin/google-chrome",
+//       "/usr/bin/google-chrome-stable",
+//       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+//       "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+//     ].find((p) => {
+//       try {
+//         return Bun.file(p).size > 0;
+//       } catch {
+//         return false;
+//       }
+//     }) ??
+//     "";
+
+//   if (!chromiumPath) {
+//     throw new Error(
+//       "Chromium not found. Set CHROMIUM_PATH in .env or install chromium-browser.\n" +
+//         "Ubuntu: sudo apt install chromium-browser\n" +
+//         "macOS:  brew install --cask google-chrome",
+//     );
+//   }
+
+//   const browser = await puppeteer.default.launch({
+//     executablePath: chromiumPath,
+//     headless: true,
+//     args: [
+//       "--no-sandbox",
+//       "--disable-setuid-sandbox",
+//       "--disable-dev-shm-usage",
+//     ],
+//   });
+
+//   try {
+//     const page = await browser.newPage();
+//     await page.setContent(html, { waitUntil: "networkidle0" });
+
+//     const outputPath = join(GENERATED_DIR, filename);
+//     await page.pdf({
+//       path: outputPath,
+//       format: "A4",
+//       printBackground: true,
+//       margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
+//     });
+
+//     return basename(outputPath); // ← return bare filename only, e.g. "Receipt_0019_...pdf"
+//   } finally {
+//     await browser.close();
+//   }
+// }
+
+// In pdfService.ts — replace the htmlToPdf function entirely
 
 async function htmlToPdf(html: string, filename: string): Promise<string> {
-  // Dynamically import puppeteer-core so this module loads even without it installed
-  const puppeteer = await import("puppeteer-core");
-
-  const chromiumPath =
-    process.env.CHROMIUM_PATH ??
-    // Common locations — first one found wins
-    [
-      "/usr/bin/chromium-browser",
-      "/usr/bin/chromium",
-      "/usr/bin/google-chrome",
-      "/usr/bin/google-chrome-stable",
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    ].find((p) => {
-      try {
-        return Bun.file(p).size > 0;
-      } catch {
-        return false;
-      }
-    }) ??
-    "";
-
-  if (!chromiumPath) {
-    throw new Error(
-      "Chromium not found. Set CHROMIUM_PATH in .env or install chromium-browser.\n" +
-        "Ubuntu: sudo apt install chromium-browser\n" +
-        "macOS:  brew install --cask google-chrome",
-    );
-  }
-
-  const browser = await puppeteer.default.launch({
-    executablePath: chromiumPath,
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-    ],
+  // Use Gotenberg cloud or pdfshift.io or html2pdf.app
+  // Example with html2pdf.app (has a free tier):
+  const response = await fetch("https://api.html2pdf.app/v1/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      html,
+      apiKey: process.env.HTML2PDF_API_KEY,
+      format: "A4",
+      marginTop: 10,
+      marginBottom: 10,
+      marginLeft: 10,
+      marginRight: 10,
+    }),
   });
 
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-
-    const outputPath = join(GENERATED_DIR, filename);
-    await page.pdf({
-      path: outputPath,
-      format: "A4",
-      printBackground: true,
-      margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
-    });
-
-    return basename(outputPath); // ← return bare filename only, e.g. "Receipt_0019_...pdf"
-  } finally {
-    await browser.close();
-  }
+  const buffer = await response.arrayBuffer();
+  const outputPath = join(GENERATED_DIR, filename);
+  await Bun.write(outputPath, buffer);
+  return basename(outputPath);
 }
 
 // ─── Allocation Letter ────────────────────────────────────────────────────────

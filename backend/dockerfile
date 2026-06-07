@@ -2,19 +2,10 @@ FROM oven/bun:1
 
 WORKDIR /app
 
-# Install Chromium for Puppeteer
-RUN apt-get update && apt-get install -y \
-    chromium \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV CHROMIUM_PATH=/usr/bin/chromium
-
 COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile
 
 COPY . .
-
 RUN mkdir -p generated
 
 EXPOSE 3000

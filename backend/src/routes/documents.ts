@@ -1,6 +1,4 @@
-import { Elysia, t } from "elysia";
-import { join, basename } from "path";
-import { existsSync } from "fs";
+import { Elysia } from "elysia";
 import {
   generateAllocationPdf,
   generateReceiptPdf,
@@ -11,14 +9,10 @@ import {
   buildAllocRef,
   getCounters,
 } from "../utils/counterStore.ts";
-import { formatDate } from "../utils/nairaWords.ts";
 import type { AllocationRequest, ReceiptRequest } from "../types.ts";
-
-const GENERATED_DIR = process.env.GENERATED_DIR ?? "./generated";
 
 export const documentsRoutes = new Elysia({ prefix: "/documents" })
 
-  // ── GET /counters ── (shows next receipt number in UI)
   .get("/counters", async () => {
     const c = await getCounters();
     return {
@@ -27,26 +21,19 @@ export const documentsRoutes = new Elysia({ prefix: "/documents" })
     };
   })
 
-  // ── POST /allocation ──────────────────────────────────────────────────────
   .post("/allocation", async ({ body, set }) => {
     const { buyer, property, financials } = body as AllocationRequest;
 
-    // Validate required
     if (
       !buyer?.name ||
       !buyer?.phone ||
-      !buyer?.address ||
       !property?.description ||
-      !property?.blockNo ||
-      !property?.estate ||
-      !property?.location ||
       !financials?.offerPrice
     ) {
       set.status = 400;
       return { error: "Missing required fields." };
     }
 
-    // Compute financials
     const offerPrice = Number(financials.offerPrice);
     const discount = Number(financials.discount) || 0;
     const vatPct = Number(financials.vatPct) || 5;
@@ -63,7 +50,8 @@ export const documentsRoutes = new Elysia({ prefix: "/documents" })
     });
 
     try {
-      const pdfPath = await generateAllocationPdf({
+      // ⚠️ UPDATE YOUR pdfService TO RETURN A BUFFER INSTEAD OF A FILEPATH
+      const pdfBuffer = await generateAllocationPdf({
         buyer,
         property,
         financials: { ...financials, offerPrice, discount, vatPct },
@@ -71,13 +59,13 @@ export const documentsRoutes = new Elysia({ prefix: "/documents" })
         date,
       });
 
-      const filename = basename(pdfPath); // safe on all OSes
-      return {
-        success: true,
-        ref,
-        filename,
-        downloadUrl: `/api/documents/download/${filename}`,
-      };
+      const filename = `allocation_${ref}.pdf`;
+
+      // Return file instantly instead of saving locally
+      set.headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+      set.headers["Content-Type"] = "application/pdf";
+
+      return pdfBuffer;
     } catch (err: any) {
       console.error("Allocation PDF error:", err);
       set.status = 500;
@@ -88,7 +76,6 @@ export const documentsRoutes = new Elysia({ prefix: "/documents" })
     }
   })
 
-  // ── POST /receipt ─────────────────────────────────────────────────────────
   .post("/receipt", async ({ body, set }) => {
     const { payer, purpose, amount, method, date, bankRef, balance, notes } =
       body as ReceiptRequest;
@@ -98,11 +85,13 @@ export const documentsRoutes = new Elysia({ prefix: "/documents" })
       return { error: "payer.name, amount, and date are required." };
     }
 
+    // ⚠️ WARNING: counterStore must read/write to a database (MongoDB, Postgres, Redis), NOT a local file!
     const counter = await nextCounter("receipt");
     const receiptNo = padNumber(counter);
 
     try {
-      const pdfPath = await generateReceiptPdf({
+      // ⚠️ UPDATE YOUR pdfService TO RETURN A BUFFER
+      const pdfBuffer = await generateReceiptPdf({
         payer,
         purpose: purpose ?? "Property Payment",
         amount: Number(amount),
@@ -114,31 +103,15 @@ export const documentsRoutes = new Elysia({ prefix: "/documents" })
         receiptNo,
       });
 
-      const filename = basename(pdfPath); // safe on all OSes
-      return {
-        success: true,
-        receiptNo,
-        filename,
-        downloadUrl: `/api/documents/download/${filename}`,
-      };
+      const filename = `receipt_${receiptNo}.pdf`;
+
+      set.headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+      set.headers["Content-Type"] = "application/pdf";
+
+      return pdfBuffer;
     } catch (err: any) {
       console.error("Receipt PDF error:", err);
       set.status = 500;
       return { error: "Failed to generate receipt.", detail: err.message };
     }
-  })
-
-  // ── GET /download/:filename ───────────────────────────────────────────────
-  // .get("/download/:filename", ({ params, set }) => {
-  //   const filename = params.filename.replace(/[^a-zA-Z0-9_.\-]/g, ""); // sanitise
-  //   const filepath = join(GENERATED_DIR, filename);
-
-  //   if (!existsSync(filepath)) {
-  //     set.status = 404;
-  //     return { error: "File not found." };
-  //   }
-
-  //   set.headers["Content-Disposition"] = `attachment; filename="${filename}"`;
-  //   set.headers["Content-Type"] = "application/pdf";
-  //   return Bun.file(filepath);
-  // });
+  });

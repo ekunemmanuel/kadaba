@@ -27,12 +27,12 @@ const app = new Elysia()
   // .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes))
   // .listen(PORT);
 
-console.log(`
-╔══════════════════════════════════════════════════╗
-║   Kadaba Document Generator API                  ║
-║   Version: 2.0.0  |  Runtime: Bun + Elysia      ║
-║   Listening on http://localhost:${PORT}           ║
-╚══════════════════════════════════════════════════╝
-`);
+// console.log(`
+// ╔══════════════════════════════════════════════════╗
+// ║   Kadaba Document Generator API                  ║
+// ║   Version: 2.0.0  |  Runtime: Bun + Elysia      ║
+// ║   Listening on http://localhost:${PORT}           ║
+// ╚══════════════════════════════════════════════════╝
+// `);
 
 export default app;

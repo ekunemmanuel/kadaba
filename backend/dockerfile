@@ -7,7 +7,6 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 RUN mkdir -p generated
-RUN mkdir -p counter_store.json
 
 EXPOSE 3000
 CMD ["bun", "src/server.ts"]

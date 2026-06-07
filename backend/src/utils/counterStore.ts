@@ -1,16 +1,25 @@
 import type { CounterStore } from "../types.ts";
+import { existsSync, statSync, rmSync } from "fs";
 
 const STORE_PATH = "./counter_store.json";
+const DEFAULTS: CounterStore = { receipt: 15, allocation: 0 };
 
 async function loadStore(): Promise<CounterStore> {
+  // Guard: Dockerfile had "RUN mkdir -p counter_store.json" which creates
+  // it as a directory. Detect and remove it so we can write a file instead.
+  if (existsSync(STORE_PATH) && statSync(STORE_PATH).isDirectory()) {
+    rmSync(STORE_PATH, { recursive: true, force: true });
+    console.warn("[counterStore] Removed counter_store.json directory, recreating as file.");
+  }
+
   try {
     const file = Bun.file(STORE_PATH);
     if (file.size === 0) throw new Error("empty");
     return JSON.parse(await file.text()) as CounterStore;
   } catch {
-    const defaults: CounterStore = { receipt: 15, allocation: 0 };
-    await Bun.write(STORE_PATH, JSON.stringify(defaults, null, 2));
-    return defaults;
+    // File doesn't exist or is corrupt — write fresh defaults
+    await Bun.write(STORE_PATH, JSON.stringify(DEFAULTS, null, 2));
+    return { ...DEFAULTS };
   }
 }
 
@@ -18,9 +27,7 @@ async function saveStore(store: CounterStore): Promise<void> {
   await Bun.write(STORE_PATH, JSON.stringify(store, null, 2));
 }
 
-/**
- * Atomically increment and return the new value.
- */
+/** Atomically increment and return the new value. */
 export async function nextCounter(type: keyof CounterStore): Promise<number> {
   const store = await loadStore();
   store[type] = (store[type] ?? 0) + 1;
@@ -28,9 +35,7 @@ export async function nextCounter(type: keyof CounterStore): Promise<number> {
   return store[type];
 }
 
-/**
- * Peek at current counters without incrementing.
- */
+/** Peek at current counters without incrementing. */
 export async function getCounters(): Promise<CounterStore> {
   return loadStore();
 }

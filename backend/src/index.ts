@@ -24,7 +24,7 @@ const app = new Elysia()
   }))
   // API routes
   .group("/api", (app) => app.use(documentsRoutes).use(emailRoutes))
-  .listen(PORT);
+  // .listen(PORT);
 
 console.log(`
 ╔══════════════════════════════════════════════════╗
